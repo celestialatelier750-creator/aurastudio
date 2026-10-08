@@ -2,784 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AuraStudio — All-in-One AI Creator Suite</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              bg: '#090d16',
-              card: '#121824',
-              border: '#1f293d',
-              accent: '#8b5cf6',
-              pink: '#ec4899',
-              cyan: '#06b6d4',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraStudio — AI Media & Script Generator</title>
   <style>
-    /* Custom Scrollbar & Aesthetic UI Adjustments */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    :root {
+      --bg: #0d0f12;
+      --card: #161b22;
+      --accent: #8a2be2;
+      --text: #f0f6fc;
+      --subtext: #8b949e;
+      --border: #30363d;
     }
-    ::-webkit-scrollbar-track {
-      background: #090d16;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1f293d;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #374151;
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .glass-card {
-      background: rgba(18, 24, 36, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .pulse-glow {
-      box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.4);
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+    header { text-align: center; margin-bottom: 8px; }
+    header h1 { font-size: 1.5rem; background: linear-gradient(90deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header p { font-size: 0.85rem; color: var(--subtext); margin-top: 4px; }
+    .card { background-color: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--subtext); display: block; margin-bottom: 6px; }
+    select, textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; margin-bottom: 12px; outline: none; }
+    select:focus, textarea:focus { border-color: var(--accent); }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(90deg, #8a2be2, #4a00e0); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .output-box { display: none; margin-top: 16px; background: #0d1117; padding: 12px; border-radius: 8px; border: 1px dashed var(--border); font-size: 0.9rem; line-height: 1.5; }
+    .media-preview { width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
+    .tag { display: inline-block; background: #21262d; color: #a855f7; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-bottom: 8px; }
+    .timeline { margin-top: 10px; padding: 8px; background: #161b22; border-radius: 6px; font-size: 0.8rem; }
   </style>
 </head>
-<body class="bg-brand-bg text-gray-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-accent selection:text-white">
+<body>
 
-  <!-- Top Navigation Header -->
-  <header class="sticky top-0 z-50 glass-card border-b border-brand-border px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-accent via-pink-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/30">
-        <i class="fa-solid font-bold text-white text-lg fa-wand-magic-sparkles"></i>
-      </div>
-      <div>
-        <h1 class="font-extrabold text-lg tracking-tight gradient-text leading-none">AuraStudio</h1>
-        <p class="text-[10px] text-gray-400 font-medium tracking-wide uppercase">AI Creator Suite</p>
-      </div>
-    </div>
-
-    <!-- Header Actions -->
-    <div class="flex items-center space-x-2">
-      <button id="openHistoryBtn" onclick="toggleModal('historyModal')" class="p-2 rounded-lg bg-brand-border/40 hover:bg-brand-border text-gray-300 hover:text-white transition text-xs flex items-center gap-1.5 border border-white/5">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        <span class="hidden sm:inline font-medium">History</span>
-      </button>
-      <button id="openSettingsBtn" onclick="toggleModal('settingsModal')" class="p-2 rounded-lg bg-brand-border/40 hover:bg-brand-border text-gray-300 hover:text-white transition text-xs flex items-center gap-1.5 border border-white/5">
-        <i class="fa-solid fa-gear"></i>
-        <span class="hidden sm:inline font-medium">API Key</span>
-      </button>
-    </div>
+<div class="container">
+  <header>
+    <h1>AuraStudio AI</h1>
+    <p>AI Generator for 60s+ Video Sequences, Outfits & Media</p>
   </header>
 
-  <!-- Notification Toast Container -->
-  <div id="toastContainer" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <div class="card">
+    <label for="mode">Select Output Mode</label>
+    <select id="mode">
+      <option value="video">1. 60-Second AI Video Sequence Generator</option>
+      <option value="fashion">2. AI Fashion Concept & Visual Outfit</option>
+      <option value="quote">3. Dark Aesthetic Quote & Visual Background</option>
+    </select>
 
-  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <label for="userInput">Describe Theme, Story, or Style</label>
+    <textarea id="userInput" rows="3" placeholder="e.g., A dramatic late-night reflection on time and success in a rainy city..."></textarea>
 
-    <!-- Hero / Mode Description Header -->
-    <div class="text-center space-y-2 py-2">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
-        Anna OS Ready • Free Smart AI Built-In
-      </div>
-      <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Create Viral Short-Form Content</h2>
-      <p class="text-xs sm:text-sm text-gray-400 max-w-lg mx-auto">Generate fashion prompts, 15s reel scripts, or dark aesthetic quotes with copyable Midjourney & Luma AI video prompts.</p>
-    </div>
+    <button class="btn" onclick="generateMedia()">Generate AI Visuals & Script</button>
 
-    <!-- Control Card -->
-    <div class="glass-card rounded-2xl p-4 sm:p-6 space-y-5 shadow-2xl relative overflow-hidden">
-      <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-      
-      <!-- Mode Selection Cards/Tabs -->
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Select Creator Tool Mode</label>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          <button type="button" onclick="setMode('fashion')" id="btn-mode-fashion" class="mode-btn p-3 rounded-xl border text-left flex flex-col justify-between transition-all bg-brand-accent/20 border-brand-accent text-white shadow-lg">
-            <div class="flex items-center justify-between mb-2">
-              <i class="fa-solid fa-shirt text-purple-400 text-lg"></i>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 font-medium">Visuals</span>
-            </div>
-            <div>
-              <div class="font-bold text-sm">Outfit Matcher</div>
-              <div class="text-[11px] text-gray-400 line-clamp-1">Style breakdown & visual prompts</div>
-            </div>
-          </button>
-
-          <button type="button" onclick="setMode('script')" id="btn-mode-script" class="mode-btn p-3 rounded-xl border border-brand-border text-left flex flex-col justify-between transition-all bg-brand-card/50 text-gray-400 hover:border-gray-600 hover:text-gray-200">
-            <div class="flex items-center justify-between mb-2">
-              <i class="fa-solid fa-clapperboard text-pink-400 text-lg"></i>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-medium">Reels</span>
-            </div>
-            <div>
-              <div class="font-bold text-sm text-white">Reel Script & Hook</div>
-              <div class="text-[11px] text-gray-400 line-clamp-1">15s Hook, Body, CTA & Video prompt</div>
-            </div>
-          </button>
-
-          <button type="button" onclick="setMode('quote')" id="btn-mode-quote" class="mode-btn p-3 rounded-xl border border-brand-border text-left flex flex-col justify-between transition-all bg-brand-card/50 text-gray-400 hover:border-gray-600 hover:text-gray-200">
-            <div class="flex items-center justify-between mb-2">
-              <i class="fa-solid fa-moon text-cyan-400 text-lg"></i>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-medium">Aesthetic</span>
-            </div>
-            <div>
-              <div class="font-bold text-sm text-white">Dark Reflection</div>
-              <div class="text-[11px] text-gray-400 line-clamp-1">Bilingual quotes & moody prompts</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Input Section -->
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <label id="inputLabel" for="userPrompt" class="text-xs font-bold uppercase tracking-wider text-gray-300">
-            Describe Outfit, Occasion or Aesthetic Style
-          </label>
-          <button onclick="fillPresetPrompt()" class="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 transition">
-            <i class="fa-solid fa-lightbulb"></i> Try Sample
-          </button>
-        </div>
-
-        <div class="relative">
-          <textarea id="userPrompt" rows="3" class="w-full bg-brand-bg/80 border border-brand-border rounded-xl p-3.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition resize-none font-sans" placeholder="e.g., Cyberpunk oversized hoodie with Japanese street aesthetic and neon rain reflection..."></textarea>
-        </div>
-
-        <!-- Preset Chips -->
-        <div id="presetChips" class="flex flex-wrap gap-1.5 pt-1">
-          <!-- Dynamically populated based on mode -->
-        </div>
-      </div>
-
-      <!-- Action Button -->
-      <button id="generateBtn" onclick="handleGenerate()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-accent via-pink-600 to-purple-600 text-white font-bold text-sm sm:text-base tracking-wide shadow-lg shadow-purple-600/30 hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>Generate Concept & Video Prompt</span>
-      </button>
-    </div>
-
-    <!-- Generated Output Display Container -->
-    <div id="outputContainer" class="hidden glass-card rounded-2xl p-4 sm:p-6 space-y-6 shadow-2xl border border-brand-accent/30 relative">
-      <div class="flex items-center justify-between border-b border-brand-border pb-4">
-        <div class="flex items-center gap-2">
-          <span id="outputBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-            AI Fashion Concept
-          </span>
-          <span id="aiEngineUsed" class="text-[11px] text-gray-400 font-mono">
-            • Engine: Local Smart AI
-          </span>
-        </div>
-        <button onclick="saveCurrentOutputToHistory()" class="text-xs text-gray-400 hover:text-amber-400 flex items-center gap-1.5 transition">
-          <i class="fa-regular fa-bookmark"></i>
-          <span>Save</span>
-        </button>
-      </div>
-
-      <!-- Loading Placeholder Spinner -->
-      <div id="loadingState" class="hidden py-12 flex flex-col items-center justify-center space-y-3">
-        <div class="w-10 h-10 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
-        <p class="text-xs text-purple-300 font-medium animate-pulse">Crafting viral concepts and Midjourney/Luma AI video prompts...</p>
-      </div>
-
-      <!-- Rendered Content Box -->
-      <div id="outputBody" class="space-y-5 text-sm">
-        <!-- Rendered via JS -->
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Settings Modal (API Key configuration) -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-brand-border shadow-2xl space-y-4 relative">
-      <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="font-bold text-base text-white flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-purple-400"></i> AI Engine Settings
-        </h3>
-        <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-gray-400 leading-relaxed">
-        By default, AuraStudio uses a high-quality local smart generation engine (100% free). Optionally, enter an OpenAI or OpenRouter API key for live LLM completions.
-      </p>
-
-      <div class="space-y-3 pt-2">
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 mb-1">OpenAI API Key (Optional)</label>
-          <input type="password" id="openaiKeyInput" class="w-full bg-brand-bg border border-brand-border rounded-xl p-3 text-xs text-gray-100 placeholder-gray-600 focus:outline-none focus:border-brand-accent" placeholder="sk-...">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-gray-300 mb-1">OpenRouter API Key (Optional)</label>
-          <input type="password" id="openrouterKeyInput" class="w-full bg-brand-bg border border-brand-border rounded-xl p-3 text-xs text-gray-100 placeholder-gray-600 focus:outline-none focus:border-brand-accent" placeholder="sk-or-v1-...">
-        </div>
-      </div>
-
-      <div class="pt-2 flex justify-end gap-2">
-        <button onclick="clearKeys()" class="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium transition">
-          Clear Keys
-        </button>
-        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-brand-accent hover:bg-purple-600 text-white text-xs font-bold transition">
-          Save Settings
-        </button>
-      </div>
-    </div>
+    <div id="output" class="output-box"></div>
   </div>
+</div>
 
-  <!-- History Modal -->
-  <div id="historyModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-card max-w-lg w-full rounded-2xl p-6 border border-brand-border shadow-2xl space-y-4 relative max-h-[80vh] flex flex-col">
-      <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="font-bold text-base text-white flex items-center gap-2">
-          <i class="fa-solid fa-bookmark text-amber-400"></i> Saved Prompt History
-        </h3>
-        <button onclick="toggleModal('historyModal')" class="text-gray-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
+<script>
+  function generateMedia() {
+    const mode = document.getElementById('mode').value;
+    const input = document.getElementById('userInput').value;
+    const output = document.getElementById('output');
 
-      <div id="historyList" class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
-        <!-- Rendered via JS -->
-      </div>
-
-      <div class="pt-2 border-t border-brand-border flex justify-between items-center">
-        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline">Clear All History</button>
-        <button onclick="toggleModal('historyModal')" class="px-4 py-2 rounded-xl bg-brand-border text-gray-200 text-xs font-bold">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    /* Global Application State */
-    let currentMode = 'fashion'; // 'fashion' | 'script' | 'quote'
-    let currentGeneratedData = null;
-
-    // Presets for quick input
-    const presets = {
-      fashion: [
-        "Korean Soft Mullet & Oversized Dark Techwear",
-        "Vintage 90s Minimalist Coffee Date Fit",
-        "Cyberpunk Neon Streetwear with Metallic Accents",
-        "Monochrome Old Money Quiet Luxury Suit"
-      ],
-      script: [
-        "3 Psychological Tricks That Feel Illegal to Know",
-        "How to Build an AI Micro-App on Mobile in 10 Mins",
-        "The Harsh Truth About Creator Monetization in 2026",
-        "5 Daily Habits That Secretly Destroy Focus"
-      ],
-      quote: [
-        "Late Night Overthinking & Quiet Ambition",
-        "Moving On in Silence and Self-Growth",
-        "The Power of Being Unbothered",
-        "Solitude vs Loneliness at 2 AM"
-      ]
-    };
-
-    // Mode labels and UI descriptions
-    const modeMeta = {
-      fashion: {
-        label: "AI Fashion Concept",
-        badgeClass: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-        inputLabel: "Describe Outfit, Occasion or Aesthetic Style",
-        placeholder: "e.g., Korean soft mullet style with oversized black street fashion for night city strolls..."
-      },
-      script: {
-        label: "Viral Reel Script & Hook",
-        badgeClass: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-        inputLabel: "Describe Video Topic, Hook or Niche",
-        placeholder: "e.g., 3 dark secrets about human psychology or quick AI side hustles for 2026..."
-      },
-      quote: {
-        label: "Dark Reflection & Quote",
-        badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-        inputLabel: "Describe Mood, Emotional Theme or Feeling",
-        placeholder: "e.g., Silence, late night realization, unbothered growth, or self-mastery..."
-      }
-    };
-
-    // Initialize application on load
-    window.addEventListener('DOMContentLoaded', () => {
-      loadSettings();
-      setMode('fashion');
-    });
-
-    function toggleModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        if (modal.classList.contains('hidden')) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-          if (modalId === 'historyModal') renderHistoryList();
-        } else {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      }
+    if (!input) {
+      alert('Please enter a topic or theme description!');
+      return;
     }
 
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `px-4 py-2.5 rounded-xl text-xs font-semibold shadow-lg text-white transition-all transform duration-300 flex items-center gap-2 pointer-events-auto border ${
-        type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200' : 'bg-purple-950/90 border-purple-500/50 text-purple-200'
-      }`;
-      toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-purple-400'}"></i> ${message}`;
-      
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-10px)';
-        setTimeout(() => toast.remove(), 300);
-      }, 2500);
-    }
+    output.style.display = 'block';
+    output.innerHTML = '<p>Generating 60-second video prompts and visual media...</p>';
 
-    function setMode(mode) {
-      currentMode = mode;
-      
-      // Update UI Tabs
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.classList.remove('bg-brand-accent/20', 'border-brand-accent', 'text-white', 'shadow-lg');
-        btn.classList.add('bg-brand-card/50', 'border-brand-border', 'text-gray-400');
-      });
+    // Encode prompt for free Pollinations API image rendering
+    const encodedPrompt = encodeURIComponent(input + " highly detailed 8k cinematic lighting vertical format");
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=540&height=960&nologo=true`;
 
-      const activeBtn = document.getElementById(`btn-mode-${mode}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-brand-card/50', 'border-brand-border', 'text-gray-400');
-        activeBtn.classList.add('bg-brand-accent/20', 'border-brand-accent', 'text-white', 'shadow-lg');
-      }
+    setTimeout(() => {
+      if (mode === 'video') {
+        output.innerHTML = `
+          <span class="tag">60+ SECOND VIDEO TIMELINE GENERATOR</span>
+          <p><b>Topic:</b> ${input}</p>
+          
+          <div class="timeline">
+            <b>🎬 Scene 1 (00:00 - 00:15): The Hook</b><br>
+            <i>Prompt:</i> "Dramatic wide shot of ${input}, dark cinematic lighting, slow zoom in, 8k resolution"<br><br>
+            <b>🎬 Scene 2 (00:15 - 00:30): Development</b><br>
+            <i>Prompt:</i> "Close up shot showing detail and atmospheric motion, rain reflections, highly stylized"<br><br>
+            <b>🎬 Scene 3 (00:30 - 00:45): The Climax</b><br>
+            <i>Prompt:</i> "High angle dynamic camera angle, moody lighting, fast motion blur, cinematic depth"<br><br>
+            <b>🎬 Scene 4 (00:45 - 01:00+): Call To Action / Resolution</b><br>
+            <i>Prompt:</i> "Minimalist aesthetic ending frame, ambient lighting, smooth cinematic fade"
+          </div>
 
-      // Update Input Labels & Placeholders
-      const meta = modeMeta[mode];
-      document.getElementById('inputLabel').innerText = meta.inputLabel;
-      document.getElementById('userPrompt').placeholder = meta.placeholder;
-
-      // Render Presets
-      const chipsContainer = document.getElementById('presetChips');
-      chipsContainer.innerHTML = presets[mode].map(p => `
-        <button onclick="setPromptText('${p.replace(/'/g, "\\'")}')" class="text-[11px] px-2.5 py-1 rounded-lg bg-brand-border/40 hover:bg-brand-border text-gray-300 hover:text-white transition border border-white/5 line-clamp-1">
-          + ${p}
-        </button>
-      `).join('');
-    }
-
-    function setPromptText(text) {
-      document.getElementById('userPrompt').value = text;
-    }
-
-    function fillPresetPrompt() {
-      const currentPresets = presets[currentMode];
-      const randomPreset = currentPresets[Math.floor(Math.random() * currentPresets.length)];
-      setPromptText(randomPreset);
-    }
-
-    function copyText(text, label = "Prompt copied to clipboard!") {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => showToast(label));
+          <p style="margin-top:10px;"><b>Generated Keyframe Preview:</b></p>
+          <img src="${imageUrl}" class="media-preview" alt="AI Generated Visual Preview" />
+        `;
+      } else if (mode === 'fashion') {
+        output.innerHTML = `
+          <span class="tag">AI FASHION & VISUAL OUTFIT</span>
+          <p><b>Style Concept:</b> ${input}</p>
+          <p><b>Outfit Breakdown:</b> Layered aesthetic, oversized silhouette with dark neutral tones.</p>
+          
+          <p style="margin-top:10px;"><b>AI Visual Model Render:</b></p>
+          <img src="${imageUrl}" class="media-preview" alt="Fashion Visual Render" />
+        `;
       } else {
-        // Fallback for iframe / unsupported browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          showToast(label);
-        } catch (err) {
-          showToast("Failed to copy text", "error");
-        }
-        document.body.removeChild(textArea);
-      }
-    }
-
-    function generateSmartLocalResponse(prompt, mode) {
-      const p = prompt.trim();
-      
-      if (mode === 'fashion') {
-        return {
-          title: `Visual Concept: ${p}`,
-          outfitBreakdown: [
-            `Top: Boxy oversized drop-shoulder graphic tee / tech-jacket with subtle utility pockets.`,
-            `Pants: Tapered tactical cargo pants or straight-leg dark denim with strap details.`,
-            `Footwear: Chunky platform sneakers in deep slate charcoal / matte black.`,
-            `Accessories: Layered silver chain necklace, matte-black smartwatch, minimalist crossbody ring.`
-          ],
-          colorPalette: ["#0d0d11 (Matte Void)", "#1f2430 (Slate Charcoal)", "#8a2be2 (Electric Violet)", "#e2e8f0 (Cold Silver)"],
-          midjourneyPrompt: `Cinematic 8k full-body street photography shot of a model wearing ${p}, sharp focus, editorial fashion aesthetic, dramatic volumetric lighting, highly detailed fabric texture, shot on 35mm lens --ar 9:16 --v 6.0`,
-          lumaVideoPrompt: `Slow-motion vertical pan of a stylish model walking down a futuristic rain-slicked street wearing ${p}, soft neon reflections, atmospheric fog, 4k ultra-realistic movement --ar 9:16`
-        };
-      }
-
-      if (mode === 'script') {
-        return {
-          topic: p,
-          hook: `🚨 "Stop scrolling if you want to master ${p.toLowerCase()} before everyone else..."`,
-          body: `Here are 2 rapid rules you need to know:\n1️⃣ The 80/20 Rule: 80% of your progress comes from 20% of your focused action.\n2️⃣ Don't build for everyone. Build the exact tool you wish existed yesterday.`,
-          cta: `💬 Comment "BUILD" below and I'll send you the full breakdown link directly!`,
-          hashtags: `#CreatorEconomy #AITools #ShortFormContent #ViralReels #BuildInPublic #${p.replace(/[^a-zA-Z0-0]/g, '')}`,
-          midjourneyPrompt: `Atmospheric dark moody aesthetic background, lone developer working in dim neon studio lighting, cinematic hyper-detailed shot --ar 9:16`,
-          lumaVideoPrompt: `High-contrast 4k video loop of abstract digital light particles flowing smoothly in dark space, atmospheric cinematic aesthetic, seamless loop --ar 9:16`
-        };
-      }
-
-      if (mode === 'quote') {
-        return {
-          theme: p,
-          quoteEnglish: `"In a world obsessed with loud reactions, the highest form of power is silent execution."`,
-          quoteHindi: `"शोर मचाने वाली दुनिया में, सबसे बड़ी ताकत आपकी खामोश मेहनत है।"`,
-          reflection: `True growth doesn't require an announcement. Move in silence, let your momentum speak for itself, and protect your peace at all costs.`,
-          midjourneyPrompt: `Minimalist dark atmospheric aesthetic background, single beam of light breaking through dark misty fog, cinematic cold color grading, 8k resolution --ar 9:16`,
-          lumaVideoPrompt: `Cinematic ultra-slow motion shot of rain dripping down a dark window pane with subtle ambient streetlight bokeh in the background, moody lo-fi aesthetic --ar 9:16`
-        };
-      }
-    }
-
-    async function handleGenerate() {
-      const userPrompt = document.getElementById('userPrompt').value.trim();
-      if (!userPrompt) {
-        showToast("Please enter a topic or prompt first!", "error");
-        return;
-      }
-
-      const outputContainer = document.getElementById('outputContainer');
-      const loadingState = document.getElementById('loadingState');
-      const outputBody = document.getElementById('outputBody');
-      const outputBadge = document.getElementById('outputBadge');
-      const aiEngineUsed = document.getElementById('aiEngineUsed');
-
-      // Update UI state to loading
-      outputContainer.classList.remove('hidden');
-      loadingState.classList.remove('hidden');
-      outputBody.innerHTML = '';
-      
-      const meta = modeMeta[currentMode];
-      outputBadge.innerText = meta.label;
-      outputBadge.className = `px-2.5 py-1 rounded-full text-xs font-bold border ${meta.badgeClass}`;
-
-      const openaiKey = localStorage.getItem('aurastudio_openai_key');
-      const openrouterKey = localStorage.getItem('aurastudio_openrouter_key');
-
-      let resultData = null;
-      let engineName = "Local Smart AI";
-
-      // Simulate network request smooth delay
-      await new Promise(r => setTimeout(r, 600));
-
-      if (openaiKey || openrouterKey) {
-        try {
-          engineName = openaiKey ? "OpenAI GPT-4o" : "OpenRouter API";
-          // If key exists, attempt live API request, fallback gracefully if quota/key fails
-          resultData = generateSmartLocalResponse(userPrompt, currentMode);
-        } catch (err) {
-          resultData = generateSmartLocalResponse(userPrompt, currentMode);
-        }
-      } else {
-        resultData = generateSmartLocalResponse(userPrompt, currentMode);
-      }
-
-      aiEngineUsed.innerText = `• Engine: ${engineName}`;
-      currentGeneratedData = { ...resultData, mode: currentMode, prompt: userPrompt, timestamp: new Date().toISOString() };
-
-      loadingState.classList.add('hidden');
-      renderOutputBody(resultData, currentMode);
-      outputContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function renderOutputBody(data, mode) {
-      const container = document.getElementById('outputBody');
-
-      if (mode === 'fashion') {
-        container.innerHTML = `
-          <!-- Outfit Breakdown -->
-          <div class="space-y-2">
-            <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-shirt text-purple-400"></i> Outfit Breakdown
-            </h4>
-            <ul class="space-y-1.5 bg-brand-bg/60 rounded-xl p-3 border border-brand-border/60 text-xs text-gray-300">
-              ${data.outfitBreakdown.map(item => `<li class="flex items-start gap-2"><span class="text-purple-400">•</span> <span>${item}</span></li>`).join('')}
-            </ul>
-          </div>
-
-          <!-- Color Palette -->
-          <div class="space-y-2">
-            <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-palette text-pink-400"></i> Color Palette
-            </h4>
-            <div class="flex flex-wrap gap-2">
-              ${data.colorPalette.map(color => {
-                const hex = color.match(/#[0-9a-fA-F]+/)?.[0] || '#333';
-                return `
-                  <div class="flex items-center gap-2 bg-brand-bg/80 border border-brand-border px-2.5 py-1.5 rounded-lg text-xs font-mono">
-                    <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background-color: ${hex}"></span>
-                    <span class="text-gray-300">${color}</span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
-          <!-- Midjourney Visual Prompt -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-image text-cyan-400"></i> Midjourney v6 Image Prompt
-              </h4>
-              <button onclick="copyText(\`${data.midjourneyPrompt.replace(/`/g, '\\`')}\`, 'Midjourney prompt copied!')" class="text-[11px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Prompt
-              </button>
-            </div>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs font-mono text-purple-200 leading-relaxed select-all">
-              ${data.midjourneyPrompt}
-            </div>
-          </div>
-
-          <!-- Luma AI Video Prompt -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-video text-amber-400"></i> Luma AI / Kling Video Prompt
-              </h4>
-              <button onclick="copyText(\`${data.lumaVideoPrompt.replace(/`/g, '\\`')}\`, 'Luma AI prompt copied!')" class="text-[11px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Prompt
-              </button>
-            </div>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs font-mono text-amber-200 leading-relaxed select-all">
-              ${data.lumaVideoPrompt}
-            </div>
-          </div>
-        `;
-      } else if (mode === 'script') {
-        container.innerHTML = `
-          <!-- Script Breakdown -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-clapperboard text-pink-400"></i> 15-Second Reel Structure
-              </h4>
-              <button onclick="copyText(\`${(data.hook + '\n\n' + data.body + '\n\n' + data.cta).replace(/`/g, '\\`')}\`, 'Full script copied!')" class="text-[11px] text-pink-400 hover:text-pink-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Script
-              </button>
-            </div>
-
-            <div class="space-y-2 bg-brand-bg/60 rounded-xl p-3 border border-brand-border/60 text-xs">
-              <div class="p-2.5 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                <span class="font-bold text-pink-300 block mb-1">0-3s Hook:</span>
-                <p class="text-gray-200 font-medium">${data.hook}</p>
-              </div>
-              <div class="p-2.5 rounded-lg bg-brand-bg border border-brand-border">
-                <span class="font-bold text-purple-300 block mb-1">3-12s Core Body:</span>
-                <p class="text-gray-300 whitespace-pre-line">${data.body}</p>
-              </div>
-              <div class="p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                <span class="font-bold text-cyan-300 block mb-1">12-15s Call to Action (CTA):</span>
-                <p class="text-gray-200 font-medium">${data.cta}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Hashtags -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-hashtag text-purple-400"></i> Viral Hashtags
-              </h4>
-              <button onclick="copyText(\`${data.hashtags}\`, 'Hashtags copied!')" class="text-[11px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy
-              </button>
-            </div>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs font-mono text-purple-300">
-              ${data.hashtags}
-            </div>
-          </div>
-
-          <!-- AI Video Background Prompt -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-video text-amber-400"></i> Video Background AI Prompt
-              </h4>
-              <button onclick="copyText(\`${data.lumaVideoPrompt.replace(/`/g, '\\`')}\`, 'Video prompt copied!')" class="text-[11px] text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Prompt
-              </button>
-            </div>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs font-mono text-amber-200">
-              ${data.lumaVideoPrompt}
-            </div>
-          </div>
-        `;
-      } else if (mode === 'quote') {
-        container.innerHTML = `
-          <!-- Quotes (Bilingual) -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-quote-left text-cyan-400"></i> Bilingual Reflection Quotes
-              </h4>
-              <button onclick="copyText(\`${(data.quoteEnglish + '\n' + data.quoteHindi).replace(/`/g, '\\`')}\`, 'Quotes copied!')" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Quotes
-              </button>
-            </div>
-
-            <div class="space-y-2 bg-brand-bg/60 rounded-xl p-4 border border-brand-border/60 text-xs">
-              <div class="border-l-2 border-cyan-400 pl-3 py-1">
-                <p class="text-sm font-semibold text-gray-100 italic">${data.quoteEnglish}</p>
-                <span class="text-[10px] text-gray-400 uppercase tracking-widest mt-1 block">English</span>
-              </div>
-              <div class="border-l-2 border-purple-400 pl-3 py-1 mt-2">
-                <p class="text-sm font-semibold text-gray-200">${data.quoteHindi}</p>
-                <span class="text-[10px] text-gray-400 uppercase tracking-widest mt-1 block">Hindi / Hinglish</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Deep Reflection -->
-          <div class="space-y-2">
-            <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-brain text-purple-400"></i> Mindset Insight
-            </h4>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs text-gray-300 leading-relaxed">
-              ${data.reflection}
-            </div>
-          </div>
-
-          <!-- Dark Aesthetic Visual Prompt -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-bold text-gray-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-moon text-amber-400"></i> Dark Cinematic Video Prompt
-              </h4>
-              <button onclick="copyText(\`${data.lumaVideoPrompt.replace(/`/g, '\\`')}\`, 'Video prompt copied!')" class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Prompt
-              </button>
-            </div>
-            <div class="bg-brand-bg border border-brand-border rounded-xl p-3 text-xs font-mono text-amber-200 select-all">
-              ${data.lumaVideoPrompt}
-            </div>
-          </div>
+        output.innerHTML = `
+          <span class="tag">DARK AESTHETIC QUOTE & VISUAL</span>
+          <p><b>Quote:</b> "In the middle of the noise, the quietest minds observe the most."</p>
+          <p><b>Caption:</b> " खामोशी सब कुछ कह देती है। / Silence speaks loudest."</p>
+          
+          <p style="margin-top:10px;"><b>AI Visual Background:</b></p>
+          <img src="${imageUrl}" class="media-preview" alt="Aesthetic Background Render" />
         `;
       }
-    }
+    }, 1200);
+  }
+</script>
 
-    function saveSettings() {
-      const openai = document.getElementById('openaiKeyInput').value.trim();
-      const openrouter = document.getElementById('openrouterKeyInput').value.trim();
-
-      if (openai) localStorage.setItem('aurastudio_openai_key', openai);
-      else localStorage.removeItem('aurastudio_openai_key');
-
-      if (openrouter) localStorage.setItem('aurastudio_openrouter_key', openrouter);
-      else localStorage.removeItem('aurastudio_openrouter_key');
-
-      showToast("API settings saved!");
-      toggleModal('settingsModal');
-    }
-
-    function clearKeys() {
-      localStorage.removeItem('aurastudio_openai_key');
-      localStorage.removeItem('aurastudio_openrouter_key');
-      document.getElementById('openaiKeyInput').value = '';
-      document.getElementById('openrouterKeyInput').value = '';
-      showToast("Keys cleared. Defaulting to free Smart AI.");
-    }
-
-    function loadSettings() {
-      const openai = localStorage.getItem('aurastudio_openai_key');
-      const openrouter = localStorage.getItem('aurastudio_openrouter_key');
-      if (openai) document.getElementById('openaiKeyInput').value = openai;
-      if (openrouter) document.getElementById('openrouterKeyInput').value = openrouter;
-    }
-
-    function getHistory() {
-      try {
-        return JSON.parse(localStorage.getItem('aurastudio_history') || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveCurrentOutputToHistory() {
-      if (!currentGeneratedData) return;
-      const history = getHistory();
-      history.unshift(currentGeneratedData);
-      localStorage.setItem('aurastudio_history', JSON.stringify(history.slice(0, 20))); // max 20
-      showToast("Saved to history!");
-    }
-
-    function renderHistoryList() {
-      const container = document.getElementById('historyList');
-      const history = getHistory();
-
-      if (history.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-gray-500">No saved history yet. Generate concepts and click 'Save'.</div>`;
-        return;
-      }
-
-      container.innerHTML = history.map((item, idx) => `
-        <div class="p-3 bg-brand-bg border border-brand-border rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 uppercase">${item.mode}</span>
-            <span class="text-[10px] text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</span>
-          </div>
-          <p class="font-bold text-gray-200 line-clamp-1">${item.prompt}</p>
-          <div class="flex justify-end gap-2 pt-1">
-            <button onclick="loadHistoryItem(${idx})" class="text-purple-400 hover:text-purple-300 text-[11px] font-semibold">Load Concept</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function loadHistoryItem(idx) {
-      const history = getHistory();
-      const item = history[idx];
-      if (!item) return;
-
-      setMode(item.mode);
-      document.getElementById('userPrompt').value = item.prompt;
-      currentGeneratedData = item;
-
-      document.getElementById('outputContainer').classList.remove('hidden');
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('outputBadge').innerText = modeMeta[item.mode].label;
-      document.getElementById('aiEngineUsed').innerText = `• Saved Item`;
-
-      renderOutputBody(item, item.mode);
-      toggleModal('historyModal');
-    }
-
-    function clearHistory() {
-      localStorage.removeItem('aurastudio_history');
-      renderHistoryList();
-      showToast("History cleared.");
-    }
-  </script>
 </body>
-                </html>
+</html>
